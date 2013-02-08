@@ -3,7 +3,7 @@
 //  raycast
 //
 //  Created by Liam Westby on 2/6/13.
-//  Copyright (c) 2013 Liam Westby. All rights reserved.
+//  Functions pertaining to the sphere shape.
 //
 
 #include <stdio.h>
@@ -12,6 +12,12 @@
 #include "vector.h"
 #include "sphere.h"
 
+/* Read in a scene file and convert the shapes into a struct. Currently returns hardcoded values.
+ * 
+ * file_path: The path to the file to be read.
+ *
+ * Return: An array of pointers to sphere structs.
+ */
 sphere** read_spheres(char *file_path) {
     sphere** objects = (sphere**)malloc(sizeof(sphere*)*6);
     for (int i = 0; i < 6; i++) {
@@ -64,6 +70,14 @@ sphere** read_spheres(char *file_path) {
     return objects;
 }
 
+/* Determine whether the given vector created by the point and direction intersects at any point on the given sphere.
+ *
+ * to_check: The sphere to check for intersection.
+ * origin: The origin of the ray.
+ * direction: unit vector representing the direction of the ray.
+ *
+ * Return: The shortest distance to intersection if it happens, or INFINITY if it does not.
+ */
 float sphere_intersect(sphere *to_check, float *origin, float *direction) {
     float a = v_dot(direction, direction);
 

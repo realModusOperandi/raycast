@@ -3,7 +3,7 @@
 //  raycast
 //
 //  Created by Liam Westby on 2/6/13.
-//  Copyright (c) 2013 Liam Westby. All rights reserved.
+//  Functions for dealing with PPM images.
 //
 
 #include <stdio.h>
@@ -11,6 +11,12 @@
 
 #include "ppm.h"
 
+/* Write an image out to disk in PPM format (P6 variant).
+ * Will exit if file could not be opened for writing.
+ *
+ * the_image: Pointer to a ppm_image struct (see ppm.h) containing the image data to be written.
+ * outfilepath: String containing the file path that should be written to.
+ */
 void write_image(ppm_image *the_image, char *outfilepath) {
     FILE *outfile;
     if ((outfile = fopen(outfilepath, "w")) == NULL) {

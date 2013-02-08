@@ -3,7 +3,7 @@
 //  raycast
 //
 //  Created by Liam Westby on 2/6/13.
-//  Copyright (c) 2013 Liam Westby. All rights reserved.
+//  This program raycasts an image given a scene file using either perspective or parallel projections.
 //
 
 #include <stdio.h>
@@ -80,6 +80,8 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
+/* Prints the correct invocation of this program.
+ */
 void print_usage() {
     printf("USAGE: raycast l|v width outputfile.ppm\n");
     printf("Where l means parallel, v means perspective, and width is an integer.\n");
