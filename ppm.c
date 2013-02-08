@@ -24,8 +24,8 @@ void write_image(ppm_image *the_image, char *outfilepath) {
     fprintf(outfile, "%d\n", the_image->height);
     fprintf(outfile, "%d\n", the_image->maxval);
     
-    for (int i = 0; i < the_image->width; i++) {
-        for (int j = 0; j < the_image->height; j++) {
+    for (int i = 0; i < the_image->height; i++) {
+        for (int j = 0; j < the_image->width; j++) {
             fputc(the_image->data[i][j].r, outfile);
             fputc(the_image->data[i][j].g, outfile);
             fputc(the_image->data[i][j].b, outfile);
