@@ -65,16 +65,36 @@ sphere** read_spheres(char *file_path) {
 }
 
 float sphere_intersect(sphere *to_check, float *origin, float *direction) {
+    float a = v_dot(direction, direction);
+
+    float *temp = (float*)malloc(sizeof(float)*3);
+    v_sub(origin, to_check->center, temp);
+    v_scale(temp, 2, temp);
+    float b = v_dot(temp, direction);
+
+    v_sub(origin, to_check->center, temp);
+    float c = v_dot(temp, temp);
+    c -= to_check->radius * to_check->radius;
     
-    
-    float a = direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2];
-    float b = 2 * (direction[0] * (origin[0] - to_check->center[0]) + direction[1] * (origin[1] - to_check->center[1]) + direction[2] * (origin[2] - to_check->center[2]));
-    float c = (origin[0] - to_check->center[0])*(origin[0] - to_check->center[0]) + (origin[1] - to_check->center[1])*(origin[1] - to_check->center[1]) + (origin[2] - to_check->center[2])*(origin[2] - to_check->center[2]) - to_check->radius * to_check->radius;
+
+    float discriminant = b*b - 4*a*c;
+
+    if (discriminant < 0) {
+
+        return INFINITY;
+    }
     
     float t1 = (-b + sqrtf(b*b - 4*a*c))/2*a;
     float t2 = (-b - sqrtf(b*b - 4*a*c))/2*a;
     
-    if (isnan(t1) && isnan(t2)) return INFINITY;
-    if (fabsf(t1) < fabsf(t2)) return t1;
-    return t2;
+
+    if (t1 > 0 && t2 > 0) {
+        return t1 < t2 ? t1 : t2;
+    }
+    if (t1 > 0) return t1;
+    if (t2 > 0) return t2;
+    else {
+
+        return INFINITY;
+    }
 }
