@@ -28,7 +28,7 @@ void raycast(ppm_image* img, sphere** objects, int num_objects, int image_width,
                 pixelvec[2] = -0.4;
                 v_unit(pixelvec, pixelvec);
                 int object_number = shoot(objects, num_objects, pixelvec, origin);
-                img->data[i][j] = *(shade(objects, object_number));
+                img->data[i][j] = shade(objects, object_number);
             }
         }
     }
@@ -48,14 +48,14 @@ int shoot(sphere **objects, int num_objects, float *direction, float *origin) {
     return object_num;
 }
 
-pixel* shade(sphere** objects, int object_number) {
-    pixel* color = (pixel*)malloc(sizeof(pixel));
-    color->r = 0;
-    color->g = 0;
-    color->b = 0;
+pixel shade(sphere** objects, int object_number) {
+    pixel color;
+    color.r = 0;
+    color.g = 0;
+    color.b = 0;
     
     if (object_number > -1) {
-        color = &objects[object_number]->color;
+        color = objects[object_number]->color;
     }
     
     return color;
