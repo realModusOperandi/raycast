@@ -13,28 +13,46 @@
 #include "raycast.h"
 #include "vector.h"
 
-void raycast(ppm_image* img, sphere** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *origin, int parallel) {
-    if (parallel) {
+void raycast_perspective(ppm_image* img, sphere** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *origin) {
+    float pixheight = world_height / image_height;
+    float pixwidth = world_width / image_width;
+    float *pixelvec = (float*)malloc(sizeof(float)*3);
+    float *unitvec = (float*)malloc(sizeof(float)*3);
+    
+    for (int i = 0; i < image_height; i++) {
+        pixelvec[1] = 0 + world_height / 2 - pixheight * (i + 0.5);
         
-    }
-    else {
-        float pixheight = world_height / (float)image_height;
-        float pixwidth = world_width/ (float)image_width;
-        float *pixelvec = (float*)malloc(sizeof(float)*3);
-        for (int i = 0; i < image_height; i++) {
-            pixelvec[1] = origin[1] - world_height / 2 + pixheight * (i + 0.5);
-            for (int j = 0; j < image_width; j++) {
-                pixelvec[0] = origin[0] - world_width / 2 + pixwidth * (j + 0.5);
-                pixelvec[2] = -0.4;
-                v_unit(pixelvec, pixelvec);
-                int object_number = shoot(objects, num_objects, pixelvec, origin);
-                img->data[i][j] = shade(objects, object_number);
-            }
+        for (int j = 0; j < image_width; j++) {
+            pixelvec[0] = 0 - world_width / 2 + pixwidth * (j + 0.5);
+            pixelvec[2] = -0.4;
+            v_unit(pixelvec, unitvec);
+
+            int object_number = shoot(objects, num_objects, origin, unitvec);
+            img->data[i][j] = shade(objects, object_number);
         }
     }
 }
 
-int shoot(sphere **objects, int num_objects, float *direction, float *origin) {
+void raycast_parallel(ppm_image* img, sphere** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *direction) {
+    float pixheight = world_height / image_height;
+    float pixwidth = world_width / image_width;
+    float *origin = (float*)malloc(sizeof(float)*3);
+    float *unitvec = direction;
+    
+    for (int i = 0; i < image_height; i++) {
+        origin[1] = 0 + world_height / 2 - pixheight * (i + 0.5);
+        
+        for (int j = 0; j < image_width; j++) {
+            origin[0] = 0 - world_width / 2 + pixwidth * (j + 0.5);
+            origin[2] = -0.4;
+            
+            int object_number = shoot(objects, num_objects, origin, unitvec);
+            img->data[i][j] = shade(objects, object_number);
+        }
+    }
+}
+
+int shoot(sphere **objects, int num_objects, float *origin, float *direction) {
     float distance = INFINITY;
     int object_num = -1;
     float tempdistance;
