@@ -13,6 +13,7 @@ void v_init(float x, float y, float z, float *out);
 float v_magnitude(float *v);
 void v_unit(float *in, float *out);
 void v_add(float *v1, float *v2, float *out);
+void v_sub(float *f1, float *f2, float *out);
 void v_sum(float *v1, float *v2, float *out);
 void v_scale(float *v, float s, float *out);
 float v_dot(float *v1, float *v2);
