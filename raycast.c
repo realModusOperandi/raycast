@@ -24,7 +24,7 @@
  * world_height: The height of the image in world units
  * origin: vector to the origin viewpoint.
  */
-void raycast_perspective(ppm_image* img, sphere** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *origin) {
+void raycast_perspective(ppm_image* img, object** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *origin) {
     float pixheight = world_height / image_height;
     float pixwidth = world_width / image_width;
     float *pixelvec = (float*)malloc(sizeof(float)*3);
@@ -55,7 +55,7 @@ void raycast_perspective(ppm_image* img, sphere** objects, int num_objects, int 
  * world_height: The height of the image in world units
  * direction: vector from each origin into the scene.
  */
-void raycast_parallel(ppm_image* img, sphere** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *direction) {
+void raycast_parallel(ppm_image* img, object** objects, int num_objects, int image_width, int image_height, float world_width, float world_height, float *direction) {
     float pixheight = world_height / image_height;
     float pixwidth = world_width / image_width;
     float *origin = (float*)malloc(sizeof(float)*3);
@@ -83,12 +83,12 @@ void raycast_parallel(ppm_image* img, sphere** objects, int num_objects, int ima
  *
  * Return: The index of the object in objects that was hit first, or -1 if no object was hit.
  */
-int shoot(sphere **objects, int num_objects, float *origin, float *direction) {
+int shoot(object **objects, int num_objects, float *origin, float *direction) {
     float distance = INFINITY;
     int object_num = -1;
     float tempdistance;
     for (int i = 0; i < num_objects; i++) {
-        tempdistance = sphere_intersect(objects[i], origin, direction);
+        tempdistance = object_intersect(objects[i], origin, direction);
         if (tempdistance < distance) {
             distance = tempdistance;
             object_num = i;
@@ -104,7 +104,7 @@ int shoot(sphere **objects, int num_objects, float *origin, float *direction) {
  *
  * Return: a pixel with color values the same as the specified shape.
  */
-pixel shade(sphere** objects, int object_number) {
+pixel shade(object** objects, int object_number) {
     pixel color;
     color.r = 0;
     color.g = 0;

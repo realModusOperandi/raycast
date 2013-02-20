@@ -11,7 +11,7 @@
 
 #include "ppm.h"
 #include "vector.h"
-#include "sphere.h"
+#include "object.h"
 #include "raycast.h"
 
 #define WORLD_WIDTH 0.5
@@ -61,7 +61,7 @@ int main(int argc, const char * argv[])
         the_image->data[i] = (pixel*)malloc(sizeof(pixel)*the_image->width);
         
     }
-    sphere **objects = read_spheres(NULL);
+    object **objects = get_objects();
     
     //Raycast the image
     if (parallel) {
