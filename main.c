@@ -11,6 +11,7 @@
 
 #include "ppm.h"
 #include "vector.h"
+#include "light.h"
 #include "object.h"
 #include "raycast.h"
 
@@ -62,19 +63,20 @@ int main(int argc, const char * argv[])
         
     }
     object **objects = get_objects();
+    point_light **lights = get_lights();
     
     //Raycast the image
     if (parallel) {
         float *direction = (float*)malloc(sizeof(float)*3);
         v_init(0.0, 0.0, -1.0, direction);
         
-        raycast_parallel(the_image, objects, 6, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, direction);
+        raycast_parallel(the_image, objects, OBJECTS_COUNT, lights, LIGHTS_COUNT, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, direction);
     }
     else {
         float *origin = (float*)malloc(sizeof(float)*3);
         v_init(0.0, 0.0, 0.4, origin);
         
-        raycast_perspective(the_image, objects, 6, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, origin);
+        raycast_perspective(the_image, objects, OBJECTS_COUNT, lights, LIGHTS_COUNT, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, origin);
     }
     write_image(the_image, output_path);
     return 0;

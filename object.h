@@ -13,6 +13,7 @@
 
 #define SPHERE_TYPE 1
 #define PLANE_TYPE 2
+#define OBJECTS_COUNT 7
 
 typedef struct {
     int type;

@@ -20,59 +20,82 @@
  * Return: An array of pointers to object structs.
  */
 object** get_objects(char *file_path) {
-    object** objects = (object**)malloc(sizeof(object*)*6);
-    for (int i = 0; i < 6; i++) {
+    object** objects = (object**)malloc(sizeof(object*)*OBJECTS_COUNT);
+    for (int i = 0; i < OBJECTS_COUNT; i++) {
         objects[i] = (object*)malloc(sizeof(object));
-        objects[i]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     }
     
-    //Red object
+    //Red sphere
     objects[0]->type = SPHERE_TYPE;
+    objects[0]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(-0.3, 0.2, -0.6, objects[0]->definition.sphere.center);
     objects[0]->definition.sphere.radius = 0.2;
     objects[0]->color.r = 255;
     objects[0]->color.g = 0;
     objects[0]->color.b = 0;
+    objects[0]->reflectivity = 0.5;
     
-    //Orange object
+    //Orange sphere
     objects[1]->type = SPHERE_TYPE;
+    objects[1]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(0.15, -0.2, -0.6, objects[1]->definition.sphere.center);
     objects[1]->definition.sphere.radius = 0.15;
     objects[1]->color.r = 255;
     objects[1]->color.g = 165;
     objects[1]->color.b = 0;
+    objects[1]->reflectivity = 0.5;
     
-    //Yellow object
+    //Yellow sphere
     objects[2]->type = SPHERE_TYPE;
+    objects[2]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(0.1, 0.175, -0.15, objects[2]->definition.sphere.center);
     objects[2]->definition.sphere.radius = 0.05;
     objects[2]->color.r = 255;
     objects[2]->color.g = 255;
     objects[2]->color.b = 0;
+    objects[2]->reflectivity = 0.5;
     
-    //Green object
+    //Green sphere
     objects[3]->type = SPHERE_TYPE;
+    objects[3]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(0.0, 0.13, -0.3, objects[3]->definition.sphere.center);
     objects[3]->definition.sphere.radius = 0.025;
     objects[3]->color.r = 0;
     objects[3]->color.g = 255;
     objects[3]->color.b = 0;
+    objects[3]->reflectivity = 0.5;
     
-    //Blue object
+    //Blue sphere
     objects[4]->type = SPHERE_TYPE;
+    objects[4]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(0.3, -0.2, -0.2, objects[4]->definition.sphere.center);
     objects[4]->definition.sphere.radius = 0.125;
     objects[4]->color.r = 0;
     objects[4]->color.g = 0;
     objects[4]->color.b = 255;
+    objects[4]->reflectivity = 0.5;
     
-    //Magenta object
+    //Magenta sphere
     objects[5]->type = SPHERE_TYPE;
+    objects[5]->definition.sphere.center = (float*)malloc(sizeof(float)*3);
     v_init(-0.2, 0.0, -0.4, objects[5]->definition.sphere.center);
     objects[5]->definition.sphere.radius = 0.06;
     objects[5]->color.r = 255;
     objects[5]->color.g = 0;
     objects[5]->color.b = 255;
+    objects[5]->reflectivity = 0.0;
+    
+    //Plane
+    objects[6]->type = PLANE_TYPE;
+    objects[6]->definition.plane.point = (float*)malloc(sizeof(float)*3);
+    objects[6]->definition.plane.normal = (float*)malloc(sizeof(float)*3);
+    v_init(0, -0.2, 0, objects[6]->definition.plane.point);
+    v_init(0, 1, 0, objects[6]->definition.plane.normal);
+    objects[6]->color.r = 127;
+    objects[6]->color.g = 127;
+    objects[6]->color.b = 127;
+    objects[6]->reflectivity = 0.5;
+    
     
     return objects;
 }
@@ -120,5 +143,23 @@ float object_intersect(object *to_check, float *origin, float *direction) {
             return INFINITY;
         }
     }
+    else if(to_check->type == PLANE_TYPE) {
+        // Compute incident angle
+        float vD = v_dot(to_check->definition.plane.normal, direction);
+        if (vD == 0) return INFINITY;
+        
+        float distance = 0;
+        for (int i = 0; i < 3; i++) {
+            distance -= to_check->definition.plane.point[i] * to_check->definition.plane.normal[i];
+        }
+        
+        float v0 = -(v_dot(to_check->definition.plane.normal, origin) + distance);
+        float t = v0/vD;
+        if (t < 0) return INFINITY;
+        
+        return t;
+    }
+    
+    return NAN;
 }
 
