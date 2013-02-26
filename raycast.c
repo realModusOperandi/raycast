@@ -14,8 +14,8 @@
 #include "vector.h"
 
 #define MAX_RAY_LEVEL 7
-#define DIFFUSE_COEFFICIENT 0.7
-#define SPECULAR_COEFFICIENT 0.3
+#define DIFFUSE_COEFFICIENT 0.3
+#define SPECULAR_COEFFICIENT 0.7
 #define AMBIENT_COEFFICIENT 0.15
 #define SPECULAR_SPREAD 5
 
@@ -83,6 +83,7 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
             origin[2] = -0.4;
             
             int object_number = shoot(objects, num_objects, origin, unitvec, &distance);
+            distance -= 0.0001;
             v_scale(unitvec, distance, position);
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
@@ -122,17 +123,6 @@ int shoot(object **objects, int num_objects, float *origin, float *direction, fl
  * Return: a pixel with color values the same as the specified shape.
  */
 pixel shade(object** objects, int object_number, point_light **lights, float *position, float *direction, int level) {
-//    pixel color;
-//    color.r = 0;
-//    color.g = 0;
-//    color.b = 0;
-//    
-//    if (object_number > -1) {
-//        color = objects[object_number]->color;
-//    }
-//    
-//    return color;
-    
     pixel color;
     if (level > MAX_RAY_LEVEL || object_number == -1) {
         color.r = 0;
@@ -156,13 +146,14 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         v_add(position, reflected_position, reflected_position);
         
         pixel m_color = shade(objects, object_hit, lights, reflected_position, reflection, level+1);
-//        m_color.r *= objects[object_hit]->reflectivity;
-//        m_color.g *= objects[object_hit]->reflectivity;
-//        m_color.b *= objects[object_hit]->reflectivity;
+        m_color.r *= objects[object_number]->reflectivity;
+        m_color.g *= objects[object_number]->reflectivity;
+        m_color.b *= objects[object_number]->reflectivity;
         
         float *from_reflected = (float*)malloc(sizeof(float)*3);
         v_scale(reflection, -1.0, from_reflected);
         color = direct_shade(objects[object_number], position, direction, from_reflected, m_color);
+
         
     }
     float *light_direction = (float*)malloc(sizeof(float)*3);
@@ -251,14 +242,17 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     
     pixel illumination;
     int illum_r = (int)(illumation_vector[0] * 0.5 * 255);
+    //illum_r *= the_object->reflectivity;
     if (illum_r > 255) illum_r = 255;
     else if (illum_r < 0) illum_r = 0;
     
     int illum_g = (int)(illumation_vector[1] * 0.5 * 255);
+    //illum_g *= the_object->reflectivity;
     if (illum_g > 255) illum_g = 255;
     else if (illum_g < 0) illum_g = 0;
     
     int illum_b = (int)(illumation_vector[2] * 0.5 * 255);
+    //illum_b *= the_object->reflectivity;
     if (illum_b > 255) illum_b = 255;
     else if (illum_b < 0) illum_b = 0;
     
