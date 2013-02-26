@@ -55,7 +55,7 @@ int main(int argc, const char * argv[])
     // Assemble the image in memory.
     ppm_image *the_image = (ppm_image*)malloc(sizeof(ppm_image));
     the_image->width = width;
-    the_image->height = (width * 4) / 5;
+    the_image->height = width * 4 / 5;
     the_image->maxval = 255;
     the_image->data = (pixel**)malloc(sizeof(pixel*)*the_image->height);
     for (int i = 0; i < the_image->height; i++) {
