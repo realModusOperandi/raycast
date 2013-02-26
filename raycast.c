@@ -14,8 +14,8 @@
 #include "vector.h"
 
 #define MAX_RAY_LEVEL 7
-#define DIFFUSE_COEFFICIENT 0.3
-#define SPECULAR_COEFFICIENT 0.7
+#define DIFFUSE_COEFFICIENT 0.7
+#define SPECULAR_COEFFICIENT 0.3
 #define AMBIENT_COEFFICIENT 0.15
 #define SPECULAR_SPREAD 5
 
@@ -48,7 +48,7 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
 
             int object_number = shoot(objects, num_objects, origin, unitvec, &distance);
             
-            distance -= 0.0001;
+            //distance -= 0.0001;
             v_scale(unitvec, distance, position);
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
@@ -83,7 +83,7 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
             origin[2] = -0.4;
             
             int object_number = shoot(objects, num_objects, origin, unitvec, &distance);
-            distance -= 0.0001;
+            //distance -= 0.0001;
             v_scale(unitvec, distance, position);
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
@@ -111,6 +111,7 @@ int shoot(object **objects, int num_objects, float *origin, float *direction, fl
             object_num = i;
         }
     }
+    distance -= 0.00001;
     if (distance_out != NULL) *(distance_out) = distance;
     return object_num;
 }
@@ -140,7 +141,7 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         color.b = 0;
     }
     else {
-        distance -= 0.000001;
+        //distance -= 0.000001;
         float *reflected_position = (float*)malloc(sizeof(float)*3);
         v_scale(reflection, distance, reflected_position);
         v_add(position, reflected_position, reflected_position);
@@ -153,7 +154,9 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         float *from_reflected = (float*)malloc(sizeof(float)*3);
         v_scale(reflection, -1.0, from_reflected);
         color = direct_shade(objects[object_number], position, direction, from_reflected, m_color);
-
+        color.r *= objects[object_number]->reflectivity;
+        color.g *= objects[object_number]->reflectivity;
+        color.b *= objects[object_number]->reflectivity;
         
     }
     float *light_direction = (float*)malloc(sizeof(float)*3);
@@ -165,12 +168,9 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         v_unit(light_direction, light_direction);
         float shoot_distance;
         int closest_object = shoot(objects, OBJECTS_COUNT, lights[i]->position, light_direction, &shoot_distance);
-        shoot_distance -= 0.0001;
+        //shoot_distance -= 0.0001;
         if (closest_object == object_number && fabs(shoot_distance - light_distance) < 0.001) {
             light = direct_shade(objects[object_number], position, direction, light_direction, lights[i]->color);
-//            color.r += light.r;
-//            color.g += light.g;
-//            color.b += light.b;
             
             int red = color.r + light.r;
             if (red > 255) red = 255;
@@ -241,18 +241,15 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     v_add(illumation_vector, ambient_vector, illumation_vector);
     
     pixel illumination;
-    int illum_r = (int)(illumation_vector[0] * 0.5 * 255);
-    //illum_r *= the_object->reflectivity;
+    int illum_r = (int)(illumation_vector[0] * 255);
     if (illum_r > 255) illum_r = 255;
     else if (illum_r < 0) illum_r = 0;
     
-    int illum_g = (int)(illumation_vector[1] * 0.5 * 255);
-    //illum_g *= the_object->reflectivity;
+    int illum_g = (int)(illumation_vector[1] * 255);
     if (illum_g > 255) illum_g = 255;
     else if (illum_g < 0) illum_g = 0;
     
-    int illum_b = (int)(illumation_vector[2] * 0.5 * 255);
-    //illum_b *= the_object->reflectivity;
+    int illum_b = (int)(illumation_vector[2] * 255);
     if (illum_b > 255) illum_b = 255;
     else if (illum_b < 0) illum_b = 0;
     
