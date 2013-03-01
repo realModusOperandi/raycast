@@ -174,7 +174,7 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         v_unit(light_direction, light_direction);
         float shoot_distance;
         int closest_object = shoot(objects, OBJECTS_COUNT, lights[i]->position, light_direction, &shoot_distance);
-        if (closest_object == object_number && fabs(shoot_distance - light_distance) < 0.001) {
+        if (closest_object == object_number && fabs(shoot_distance - light_distance) < 0.1) {
             light = direct_shade(objects[object_number], position, direction, light_direction, lights[i]->color);
             
             int red = color.r + light.r;
