@@ -100,7 +100,7 @@ object** get_objects(char *file_path) {
     return objects;
 }
 
-/* Determine whether the given vector created by the point and direction intersects at any point on the given sphere.
+/* Determine whether the given vector created by the point and direction intersects at any point on the given object.
  *
  * to_check: The sphere to check for intersection.
  * origin: The origin of the ray.

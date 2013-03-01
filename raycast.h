@@ -17,7 +17,5 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
 int shoot(object** objects, int num_objects, float *origin, float *direction, float *distance_out);
 pixel shade(object** objects, int object_number, point_light **lights, float *position, float *direction, int level);
 pixel direct_shade(object *the_object, float *position, float *direction, float *from_light, pixel light_color);
-float* reflection_vector(object *the_object, float *position, float *direction);
-float* get_normal(object *the_object, float *position);
 
 #endif

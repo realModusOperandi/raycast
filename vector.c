@@ -106,3 +106,40 @@ void v_cross(float *v1, float *v2, float *out) {
     out[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
+
+/* Compute the reflection of a vector on an object.
+ *
+ * the_object: The object to reflect off of.
+ * position: The position hit.
+ * direction: The direction of the vector to be reflected.
+ *
+ * Returns: the reflection of direction on the object at position.
+ */
+float* reflection_vector(object *the_object, float *position, float *direction) {
+    float *reflection = (float*)malloc(sizeof(float)*3);
+    float *normal = get_normal(the_object, position);
+    v_scale(normal, -2*v_dot(direction, normal), reflection);
+    v_add(reflection, direction, reflection);
+    v_unit(reflection, reflection);
+    
+    return reflection;
+}
+
+/* Get the normal of a shape at a given position.
+ *
+ * the_object: The object to get the normal of.
+ * position: The position on the object to calculate the normal.
+ * 
+ * Returns: The normal to the object at the given position.
+ */
+float* get_normal(object *the_object, float *position) {
+    float *normal;
+    if (the_object->type == PLANE_TYPE) normal = the_object->definition.plane.normal;
+    else {
+        normal = (float*)malloc(sizeof(float)*3);
+        v_sub(position, the_object->definition.sphere.center, normal);
+        v_unit(normal, normal);
+    }
+    return normal;
+}
+

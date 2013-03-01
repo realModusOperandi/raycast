@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "ppm.h"
 #include "vector.h"
@@ -22,6 +23,7 @@ void print_usage();
 
 int main(int argc, const char * argv[])
 {
+    long startTime = time(NULL);
 
     if (argc < 4) {
         // Requires 3 arguments: l/v, width of image, and output file.
@@ -62,6 +64,7 @@ int main(int argc, const char * argv[])
         the_image->data[i] = (pixel*)malloc(sizeof(pixel)*the_image->width);
         
     }
+    // Set up the scene
     object **objects = get_objects();
     point_light **lights = get_lights();
     
@@ -78,7 +81,9 @@ int main(int argc, const char * argv[])
         
         raycast_perspective(the_image, objects, OBJECTS_COUNT, lights, LIGHTS_COUNT, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, origin);
     }
+    // Write out the image to disk.
     write_image(the_image, output_path);
+    printf("%ld\n", (time(NULL) - startTime));
     return 0;
 }
 

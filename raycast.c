@@ -3,7 +3,7 @@
 //  raycast
 //
 //  Created by Liam Westby on 2/7/13.
-//  Functions to raycast an image.
+//  Functions to raytrace an image.
 //
 
 #include <stdio.h>
@@ -22,12 +22,14 @@
 /* Raycast an image with the given scene of the given size using perspective projection from the given origin.
  *
  * img: The image to write to.
- * objects: The objects in the scene
- * num_objects: The number of objects in the scene
- * image_width: The width of the final image, in pixels
- * image_height: The height of the final image, in pixels
- * world_width: The width of the image in world units
- * world_height: The height of the image in world units
+ * objects: The objects in the scene.
+ * num_objects: The number of objects in the scene.
+ * lights: The lights in the scene.
+ * num_lights: The number of lights in the scene.
+ * image_width: The width of the final image, in pixels.
+ * image_height: The height of the final image, in pixels.
+ * world_width: The width of the image in world units.
+ * world_height: The height of the image in world units.
  * origin: vector to the origin viewpoint.
  */
 void raycast_perspective(ppm_image* img, object** objects, int num_objects, point_light **lights, int num_lights, int image_width, int image_height, float world_width, float world_height, float *origin) {
@@ -59,12 +61,14 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
 /* Raycast an image with the given scene of the given size using parallel projection in the given direction.
  *
  * img: The image to write to.
- * objects: The objects in the scene
- * num_objects: The number of objects in the scene
- * image_width: The width of the final image, in pixels
- * image_height: The height of the final image, in pixels
- * world_width: The width of the image in world units
- * world_height: The height of the image in world units
+ * objects: The objects in the scene.
+ * num_objects: The number of objects in the scene.
+ * lights: The lights in the scene.
+ * num_lights: The number of lights in the scene.
+ * image_width: The width of the final image, in pixels.
+ * image_height: The height of the final image, in pixels.
+ * world_width: The width of the image in world units.
+ * world_height: The height of the image in world units.
  * direction: vector from each origin into the scene.
  */
 void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_light **lights, int num_lights, int image_width, int image_height, float world_width, float world_height, float *direction) {
@@ -93,10 +97,11 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
 
 /* Shoots the ray defined by the given origin and direction into the scene of objects and determines which (if any) is hit first.
  *
- * objects: The objects in the scene
- * num_objects: The number of objects in the scene
+ * objects: The objects in the scene.
+ * num_objects: The number of objects in the scene.
  * origin: The point of origin of the ray.
  * direction: The direction the ray is going, as a unit vector.
+ * distance_out: outparameter for the distance from the origin to the first object hit.
  *
  * Return: The index of the object in objects that was hit first, or -1 if no object was hit.
  */
@@ -116,12 +121,18 @@ int shoot(object **objects, int num_objects, float *origin, float *direction, fl
     return object_num;
 }
 
-/* Get the color of the given shape.
+/* Get the color of the given object at the given point.
+ * Recursively calculates reflection, then factors in lighting.
  *
- * objects: The objects in the scene
+ * objects: The objects in the scene.
  * object_number: The index in objects of the object whose color is requested.
+ * lights: The lights in the scene.
+ * position: The point in the scene the find the color of.
+ * direction: The direction vector used to shoot.
+ * level: the level of recursion. Should start at 0.
+ * 
  *
- * Return: a pixel with color values the same as the specified shape.
+ * Return: a pixel with color values the same as the specified shape at the position hit.
  */
 pixel shade(object** objects, int object_number, point_light **lights, float *position, float *direction, int level) {
     pixel color;
@@ -141,11 +152,11 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         color.b = 0;
     }
     else {
-        //distance -= 0.000001;
         float *reflected_position = (float*)malloc(sizeof(float)*3);
         v_scale(reflection, distance, reflected_position);
         v_add(position, reflected_position, reflected_position);
         
+        // Calculate the color of light reflected to this position from elsewhere
         pixel m_color = shade(objects, object_hit, lights, reflected_position, reflection, level+1);
         m_color.r *= objects[object_number]->reflectivity;
         m_color.g *= objects[object_number]->reflectivity;
@@ -153,6 +164,8 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         
         float *from_reflected = (float*)malloc(sizeof(float)*3);
         v_scale(reflection, -1.0, from_reflected);
+        
+        // Shade the object at this point with the light calculated above
         color = direct_shade(objects[object_number], position, direction, from_reflected, m_color);
         color.r *= objects[object_number]->reflectivity;
         color.g *= objects[object_number]->reflectivity;
@@ -162,13 +175,11 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
     float *light_direction = (float*)malloc(sizeof(float)*3);
     pixel light;
     for (int i = 0; i < LIGHTS_COUNT; i++) {
-        //float* light_location = lights[i]->position;
         v_sub(position, lights[i]->position, light_direction);
         float light_distance = v_magnitude(light_direction);
         v_unit(light_direction, light_direction);
         float shoot_distance;
         int closest_object = shoot(objects, OBJECTS_COUNT, lights[i]->position, light_direction, &shoot_distance);
-        //shoot_distance -= 0.0001;
         if (closest_object == object_number && fabs(shoot_distance - light_distance) < 0.001) {
             light = direct_shade(objects[object_number], position, direction, light_direction, lights[i]->color);
             
@@ -193,6 +204,18 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
     
 }
 
+/* Calculate the color of an object at a given position for a given light.
+ * Factors in specular, diffuse, and ambient components of light.
+ *
+ * the_object: The object to shade.
+ * position: The position in space to shade.
+ * direction: The direction from the origin to the position.
+ * from_light: The direction from the light to the position.
+ * light_color: The color of the light to shade with.
+ *
+ * Returns: the color of the object as shaded by the light at the given position.
+ */
+ 
 pixel direct_shade(object *the_object, float *position, float *direction, float *from_light, pixel light_color) {
     // Vector here is used in the sense of multiple values, not a direction in space
     float *illumation_vector = (float*)malloc(sizeof(float)*3);
@@ -203,7 +226,6 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     float *reflected = reflection_vector(the_object, position, from_light);
     float *view = (float*)malloc(sizeof(float)*3);
     v_scale(direction, -1.0, view);
-    //v_unit(view, view);
     
     // Convert the pixel values to floats between 0.0 and 1.0 for use in the equation
     float *object_color_vector = (float*)malloc(sizeof(float)*3);
@@ -258,25 +280,4 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     illumination.b = illum_b;
     
     return illumination;
-}
-
-float* reflection_vector(object *the_object, float *position, float *direction) {
-    float *reflection = (float*)malloc(sizeof(float)*3);
-    float *normal = get_normal(the_object, position);
-    v_scale(normal, -2*v_dot(direction, normal), reflection);
-    v_add(reflection, direction, reflection);
-    v_unit(reflection, reflection);
-
-    return reflection;
-}
-
-float* get_normal(object *the_object, float *position) {
-    float *normal;
-    if (the_object->type == PLANE_TYPE) normal = the_object->definition.plane.normal;
-    else {
-        normal = (float*)malloc(sizeof(float)*3);
-        v_sub(position, the_object->definition.sphere.center, normal);
-        v_unit(normal, normal);
-    }
-    return normal;
 }

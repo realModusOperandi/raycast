@@ -9,6 +9,8 @@
 #ifndef raycast_vector_h
 #define raycast_vector_h
 
+#include "object.h"
+
 void v_init(float x, float y, float z, float *out);
 float v_magnitude(float *v);
 void v_unit(float *in, float *out);
@@ -18,5 +20,7 @@ void v_sum(float *v1, float *v2, float *out);
 void v_scale(float *v, float s, float *out);
 float v_dot(float *v1, float *v2);
 void v_cross(float *v1, float *v2, float *out);
+float* reflection_vector(object *the_object, float *position, float *direction);
+float* get_normal(object *the_object, float *position);
 
 #endif

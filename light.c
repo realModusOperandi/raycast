@@ -12,6 +12,10 @@
 #include "light.h"
 #include "vector.h"
 
+/* Read in a light file and convert the lights into a struct. Currently returns hardcoded values.
+ *
+ * Return: An array of pointers to point_light structs.
+ */
 point_light** get_lights() {
     point_light **lights = (point_light**)malloc(sizeof(point_light*)*2);
     
