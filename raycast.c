@@ -17,7 +17,7 @@
 #define DIFFUSE_COEFFICIENT 0.7
 #define SPECULAR_COEFFICIENT 0.3
 #define AMBIENT_COEFFICIENT 0.15
-#define SPECULAR_SPREAD 5
+#define SPECULAR_SPREAD 15
 
 /* Raycast an image with the given scene of the given size using perspective projection from the given origin.
  *
@@ -50,7 +50,6 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
 
             int object_number = shoot(objects, num_objects, origin, unitvec, &distance);
             
-            //distance -= 0.0001;
             v_scale(unitvec, distance, position);
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
@@ -87,7 +86,6 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
             origin[2] = -0.4;
             
             int object_number = shoot(objects, num_objects, origin, unitvec, &distance);
-            //distance -= 0.0001;
             v_scale(unitvec, distance, position);
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
@@ -166,11 +164,7 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         v_scale(reflection, -1.0, from_reflected);
         
         // Shade the object at this point with the light calculated above
-        color = direct_shade(objects[object_number], position, direction, from_reflected, m_color);
-        color.r *= objects[object_number]->reflectivity;
-        color.g *= objects[object_number]->reflectivity;
-        color.b *= objects[object_number]->reflectivity;
-        
+        color = direct_shade(objects[object_number], position, direction, from_reflected, m_color);        
     }
     float *light_direction = (float*)malloc(sizeof(float)*3);
     pixel light;
@@ -200,12 +194,17 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
         }
     }
     
+    // Factor in ambient light. Since light is white, multiplication would just result in the coefficient.
+    color.r += AMBIENT_COEFFICIENT;
+    color.g += AMBIENT_COEFFICIENT;
+    color.b += AMBIENT_COEFFICIENT;
+    
     return color;
     
 }
 
 /* Calculate the color of an object at a given position for a given light.
- * Factors in specular, diffuse, and ambient components of light.
+ * Factors in specular and diffuse components of light.
  *
  * the_object: The object to shade.
  * position: The position in space to shade.
@@ -221,7 +220,8 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     float *illumation_vector = (float*)malloc(sizeof(float)*3);
     float *diffuse_vector = (float*)malloc(sizeof(float)*3);
     float *specular_vector = (float*)malloc(sizeof(float)*3);
-    float *ambient_vector = (float*)malloc(sizeof(float)*3);
+    
+    // These are actual vectors
     float *normal = get_normal(the_object, position);
     float *reflected = reflection_vector(the_object, position, from_light);
     float *view = (float*)malloc(sizeof(float)*3);
@@ -238,7 +238,7 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     light_color_vector[1] = light_color.g/255.0;
     light_color_vector[2] = light_color.b/255.0;
     
-    // For use in specular and ambient calculations
+    // For use in specular calculations
     float *white_color = (float*)malloc(sizeof(float)*3);
     white_color[0] = 1.0;
     white_color[1] = 1.0;
@@ -257,10 +257,8 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     // Calculate final illumination vector
     v_scale(diffuse_vector, DIFFUSE_COEFFICIENT, diffuse_vector);
     v_scale(specular_vector, SPECULAR_COEFFICIENT, specular_vector);
-    v_scale(white_color, AMBIENT_COEFFICIENT, ambient_vector);
     
     v_add(diffuse_vector, specular_vector, illumation_vector);
-    v_add(illumation_vector, ambient_vector, illumation_vector);
     
     pixel illumination;
     int illum_r = (int)(illumation_vector[0] * 255);
