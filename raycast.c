@@ -55,6 +55,10 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
         }
     }
+    
+    free(position);
+    free(unitvec);
+    free(pixelvec);
 }
 
 /* Raycast an image with the given scene of the given size using parallel projection in the given direction.
@@ -91,6 +95,10 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
         }
     }
+    
+    free(position);
+    free(unitvec);
+    free(origin);
 }
 
 /* Shoots the ray defined by the given origin and direction into the scene of objects and determines which (if any) is hit first.
@@ -217,7 +225,7 @@ pixel shade(object** objects, int object_number, point_light **lights, float *po
  
 pixel direct_shade(object *the_object, float *position, float *direction, float *from_light, pixel light_color) {
     // Vector here is used in the sense of multiple values, not a direction in space
-    float *illumation_vector = (float*)malloc(sizeof(float)*3);
+    float *illumination_vector = (float*)malloc(sizeof(float)*3);
     float *diffuse_vector = (float*)malloc(sizeof(float)*3);
     float *specular_vector = (float*)malloc(sizeof(float)*3);
     
@@ -258,24 +266,29 @@ pixel direct_shade(object *the_object, float *position, float *direction, float 
     v_scale(diffuse_vector, DIFFUSE_COEFFICIENT, diffuse_vector);
     v_scale(specular_vector, SPECULAR_COEFFICIENT, specular_vector);
     
-    v_add(diffuse_vector, specular_vector, illumation_vector);
+    v_add(diffuse_vector, specular_vector, illumination_vector);
     
     pixel illumination;
-    int illum_r = (int)(illumation_vector[0] * 255);
+    int illum_r = (int)(illumination_vector[0] * 255);
     if (illum_r > 255) illum_r = 255;
     else if (illum_r < 0) illum_r = 0;
     
-    int illum_g = (int)(illumation_vector[1] * 255);
+    int illum_g = (int)(illumination_vector[1] * 255);
     if (illum_g > 255) illum_g = 255;
     else if (illum_g < 0) illum_g = 0;
     
-    int illum_b = (int)(illumation_vector[2] * 255);
+    int illum_b = (int)(illumination_vector[2] * 255);
     if (illum_b > 255) illum_b = 255;
     else if (illum_b < 0) illum_b = 0;
     
     illumination.r = illum_r;
     illumination.g = illum_g;
     illumination.b = illum_b;
+    
+    free(white_color);
+    free(light_color_vector);
+    free(object_color_vector);
+    free(view);
     
     return illumination;
 }

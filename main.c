@@ -17,7 +17,7 @@
 #include "raycast.h"
 
 #define WORLD_WIDTH 0.5
-#define WORLD_HEIGHT 0.4
+#define WORLD_HEIGHT 0.3125
 
 void print_usage();
 
@@ -57,7 +57,7 @@ int main(int argc, const char * argv[])
     // Assemble the image in memory.
     ppm_image *the_image = (ppm_image*)malloc(sizeof(ppm_image));
     the_image->width = width;
-    the_image->height = width * 4 / 5;
+    the_image->height = width * 5 / 8;
     the_image->maxval = 255;
     the_image->data = (pixel**)malloc(sizeof(pixel*)*the_image->height);
     for (int i = 0; i < the_image->height; i++) {
@@ -77,7 +77,7 @@ int main(int argc, const char * argv[])
     }
     else {
         float *origin = (float*)malloc(sizeof(float)*3);
-        v_init(0.0, 0.0, 0.4, origin);
+        v_init(0.0, 0.0, 0.8, origin);
         
         raycast_perspective(the_image, objects, OBJECTS_COUNT, lights, LIGHTS_COUNT, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, origin);
     }
