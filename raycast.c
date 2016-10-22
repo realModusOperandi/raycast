@@ -40,6 +40,7 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
     float *position = (float*)malloc(sizeof(float)*3);
     float distance;
     
+    int next_percent = 0;
     for (int i = 0; i < image_height; i++) {
         pixelvec[1] = 0 + world_height / 2 - pixheight * (i + 0.5);
         
@@ -54,7 +55,21 @@ void raycast_perspective(ppm_image* img, object** objects, int num_objects, poin
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
         }
+        int progress = (int)((i / (double)image_height) * 100);
+        if (progress == next_percent) {
+            printf("%d%%... ", progress);
+            fflush(stdout);
+            if (image_width <= 1000) {
+                next_percent += 20;
+            } else if (image_width <= 3000) {
+                next_percent += 10;
+            } else {
+                next_percent += 1;
+            }
+            
+        }
     }
+    printf("done.\n");
     
     free(position);
     free(unitvec);
@@ -82,6 +97,7 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
     float *position = (float*)malloc(sizeof(float)*3);
     float distance;
     
+    int ten_percent = image_height * 10;
     for (int i = 0; i < image_height; i++) {
         origin[1] = 0 + world_height / 2 - pixheight * (i + 0.5);
         
@@ -94,7 +110,11 @@ void raycast_parallel(ppm_image* img, object** objects, int num_objects, point_l
             v_add(origin, position, position);
             img->data[i][j] = shade(objects, object_number, lights, position, unitvec, 0);
         }
+        if (i % ten_percent == 0) {
+            printf("%d%%... ", i / ten_percent);
+        }
     }
+    printf("done.\n");
     
     free(position);
     free(unitvec);

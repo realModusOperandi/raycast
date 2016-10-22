@@ -55,6 +55,7 @@ int main(int argc, const char * argv[])
     char *output_path = argv[3];
     
     // Assemble the image in memory.
+    printf("Assemble the image in memory...\n");
     ppm_image *the_image = (ppm_image*)malloc(sizeof(ppm_image));
     the_image->width = width;
     the_image->height = width * 5 / 8;
@@ -65,10 +66,12 @@ int main(int argc, const char * argv[])
         
     }
     // Set up the scene
+    printf("Set up the scene...\n");
     object **objects = get_objects();
     point_light **lights = get_lights();
     
     //Raycast the image
+    printf("Raycast the image...\n");
     if (parallel) {
         float *direction = (float*)malloc(sizeof(float)*3);
         v_init(0.0, 0.0, -1.0, direction);
@@ -82,8 +85,9 @@ int main(int argc, const char * argv[])
         raycast_perspective(the_image, objects, OBJECTS_COUNT, lights, LIGHTS_COUNT, the_image->width, the_image->height, WORLD_WIDTH, WORLD_HEIGHT, origin);
     }
     // Write out the image to disk.
+    printf("Write out the image to disk...\n");
     write_image(the_image, output_path);
-    printf("%ld\n", (time(NULL) - startTime));
+    printf("Completed. Time: %lds\n", (time(NULL) - startTime));
     return 0;
 }
 
